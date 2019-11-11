@@ -1,0 +1,4 @@
+file_images_path: "/var/tmp/images"
+img_width: 320
+img_height: 240
+restart_if_no_more_images: true
