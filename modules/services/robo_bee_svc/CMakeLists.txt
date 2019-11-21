@@ -1,5 +1,7 @@
-set(PROJ_NAME queen_bee)
+set(PROJ_NAME robo_bee_svc)
 project(${PROJ_NAME})
+
+set( ${PROJ_MAIN_NAME}_PATH_INSTALL )
 
 # Include directories with headers
 # ---------------------------------------------------#
@@ -29,6 +31,7 @@ target_link_libraries(
   ${PROJ_NAME}
   ${KLEPSYDRA_CORE_LIBRARIES}
   ${KLEPSYDRA_ROBOTICS_LIBRARIES}
+  ${OpenCV_LIBS}
 )
 
 

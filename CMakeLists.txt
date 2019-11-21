@@ -2,7 +2,7 @@
 # ------------------------------------------------------------------------------
 cmake_minimum_required(VERSION 2.8.11)
 
-set(PROJ_MAIN_NAME "robobee")
+set(PROJ_MAIN_NAME "bee_service")
 project(${PROJ_MAIN_NAME})
 
 set(
@@ -87,11 +87,16 @@ if (HAS_CXX11)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 endif ()
 
-#find_package(Klepsydra REQUIRED)
-#include(${KLEPSYDRA_CODE_GENERATOR})
+find_package(Klepsydra REQUIRED)
+include(${KLEPSYDRA_CODE_GENERATOR})
 
 add_definitions(-std=c++11)
 enable_testing()
+
+find_package(OpenCV REQUIRED)
+if (OpenCV_DIR STREQUAL NOT_FOUND)
+  message(FATAL_ERROR "Install OpenCV")
+endif ()
 
 # Configuration current project
 # ------------------------------------------------------------------------------

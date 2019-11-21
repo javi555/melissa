@@ -1,4 +1,4 @@
-set(PROJ_NAME robo_bee)
+set(PROJ_NAME queen_bee_svc)
 project(${PROJ_NAME})
 
 set( ${PROJ_MAIN_NAME}_PATH_INSTALL )
