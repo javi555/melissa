@@ -1,28 +1,37 @@
 
 #include "queen_bee_svc.h"
 #include "robo_bee_svc.h"
+#include "yaml-cpp/yaml.h"
 #include <iostream>
 #include <klepsydra/core/publisher.h>
 #include <klepsydra/core/subscriber.h>
+#include <klepsydra/core/yaml_environment.h>
 #include <klepsydra/high_performance/event_loop_middleware_provider.h>
-#include <klepsydra/mem_core/mem_env.h>
 
 int main(int argc, char **argv) {
 
-  int imgWidth = 480;
-  int imgHeight = 240;
-  
-  // 1.- Env
-  kpsr::mem::MemEnv environment;
+  int iters = std::stoi(argv[1]);
+
+  // 1.- Load config
+
+  std::string yaml_path =
+      "/home/javi/projects/melissa/modules/config/yaml/image.yaml"; // TODO: put
+                                                                    // this in a
+                                                                    // env var
+  kpsr::YamlEnvironment yamlEnv(yaml_path);
+
+  float imgWidth;
+  float imgHeight;
+
+  yamlEnv.getPropertyFloat("img_width", imgWidth);
+  yamlEnv.getPropertyFloat("img_height", imgHeight);
+
+  spdlog::info("MemApp: loaded width: {:03.0f}", imgWidth);
+  spdlog::info("MemApp: loaded height: {:03.0f}", imgHeight);
 
   // 2.- Create EventLoop
 
-  kpsr::high_performance::EventLoopMiddlewareProvider<2> eventloop(nullptr);
-
-  eventloop.getSubscriber<kpsr::vision_ocv::ImageData>("test")->registerListener(
-      "ImageData", [](const kpsr::vision_ocv::ImageData &image) {
-        std::cout << "Image received" << std::endl;
-      });
+  kpsr::high_performance::EventLoopMiddlewareProvider<16> eventloop(nullptr);
 
   eventloop.start();
 
@@ -34,18 +43,30 @@ int main(int argc, char **argv) {
       eventloop.getPublisher<kpsr::vision_ocv::ImageData>("ImageData", 0,
                                                           nullptr, nullptr);
 
+  kpsr::Subscriber<mls::Waypoint> *waypointSubscriber =
+      eventloop.getSubscriber<mls::Waypoint>("Waypoint");
+  kpsr::Publisher<mls::Waypoint> *waypointPublisher =
+      eventloop.getPublisher<mls::Waypoint>("Waypoint", 0, nullptr, nullptr);
+
   // 4.- Launch services
 
-  mls::RoboBeeSvc roboBeeSvc(nullptr, imageDataPublisher, imgWidth, imgHeight);
-  mls::QueenBeeSvc queenBeeSvc(nullptr, imageDataSubscriber);
+  mls::RoboBeeSvc roboBeeSvc(nullptr, imageDataPublisher, waypointSubscriber,
+                             imgWidth, imgHeight, "/var/tmp/images", true);
+  mls::QueenBeeSvc queenBeeSvc(nullptr, imageDataSubscriber, waypointPublisher);
 
   roboBeeSvc.startup();
-  std::cout << "RoboBee Service started" << std::endl;
+  spdlog::info("MemApp: RoboBee Service started");
   queenBeeSvc.startup();
-  std::cout << "QueenBee Service started" << std::endl;
+  spdlog::info("MemApp: QueenBee Service started");
 
-  eventloop.getSubscriber<kpsr::vision_ocv::ImageData>("test")->removeListener(
+  for (int i=0;i<iters;i++) {
+    roboBeeSvc.runOnce();
+    queenBeeSvc.runOnce();
+  }
+
+  eventloop.getSubscriber<kpsr::vision_ocv::ImageData>("img")->removeListener(
       "ImageData");
+  eventloop.getSubscriber<mls::Waypoint>("wp")->removeListener("Waypoint");
   eventloop.stop();
 
   return 0;

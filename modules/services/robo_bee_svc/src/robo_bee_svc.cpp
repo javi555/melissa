@@ -4,54 +4,72 @@ namespace mls {
 
 RoboBeeSvc::RoboBeeSvc(
     kpsr::Environment *environment,
-    kpsr::Publisher<kpsr::vision_ocv::ImageData> *
-                   imageDataPublisher,
-                   int witdh, int height)
-    :
-    Service(environment, "robo_bee_service")
-    , _imageDataPublisher(imageDataPublisher)
-    , _imgWidth(witdh)
-    , _imgHeigh(height)
-    , _capturing(false){}
+    kpsr::Publisher<kpsr::vision_ocv::ImageData> *imageDataPublisher,
+    kpsr::Subscriber<mls::Waypoint> *waypointSubscriber, int witdh, int height,
+    std::string imageDirname, bool restartIfNoMoreImages)
+    : Service(environment, "robo_bee_service"),
+      _imageDataPublisher(imageDataPublisher),
+      _waypointSubscriber(waypointSubscriber), _imgWidth(witdh),
+      _imgHeigh(height), _imageDirname(imageDirname),
+      _restartIfNoMoreImages(restartIfNoMoreImages) {}
 
-void RoboBeeSvc::start() {}
-void RoboBeeSvc::stop() {}
+void RoboBeeSvc::start() {
+  _waypointSubscriber->registerListener(
+      "WpRBSvc",
+      std::bind(&RoboBeeSvc::onWaypointReceived, this,
+                std::placeholders::_1));
+
+  if (fileNameList == nullptr) {
+    index = 2;
+    fileNameList = new std::vector<std::string>();
+    FileUtils::getSortedListOfFilesInDir(_imageDirname, fileNameList);
+    sz = fileNameList->size();
+    spdlog::info("RoboBeeSvc: Read a list of {} images in folder: {}", sz - 2,
+                 _imageDirname);
+  }
+}
+void RoboBeeSvc::stop() { fileNameList = nullptr; }
+
 void RoboBeeSvc::execute() {
-    std::cout << "execute" << std::endl;
-    kpsr::vision_ocv::ImageData image;
-    _imageDataPublisher->publish(image);
+
+  _image.frameId = "frame";
+  fullScaleImage = getImage();
+  resize(fullScaleImage, _image.img, cvSize(_imgWidth, _imgHeigh));
+  _imageDataPublisher->publish(_image);
+  spdlog::info("RoboBeeSvc: Published Image");
 }
 
-void RoboBeeSvc::capture()
-{
-     _currentImgId++;
-     // _img=image
-}
-void RoboBeeSvc::sendImg()
-{
-    //publish img to QueenBee via ZMQ
-    std::cout << "Publish Image, resolution: " << _imgWidth << " x " << _imgHeigh;
-}
-void RoboBeeSvc::onPoseReceived()
-{
-    //Received pose from QueenBee and update waypoint destination
-}
-void RoboBeeSvc::goToWaypoint()
-{
-    //fly to defined wp
+bool RoboBeeSvc::hasMoreImages() { return (index < (sz)); }
+
+cv::Mat RoboBeeSvc::getImage() {
+  if (hasMoreImages()) {
+    std::string image_path;
+    image_path.append(_imageDirname);
+    image_path.append("/");
+    image_path.append((*fileNameList)[index++]);
+    _fileImage = cv::imread(image_path);
+    if (!_fileImage.data) {
+      spdlog::warn("Could not open or find the image in{}", image_path);
+    }
+
+    return _fileImage;
+
+  } else {
+    if (_restartIfNoMoreImages) {
+      this->stop();
+      this->start();
+      return getImage();
+    }
+  }
 }
 
-void RoboBeeSvc::startCapturing()
-{
-    _capturing = true;
+void RoboBeeSvc::onWaypointReceived(const mls::Waypoint &wp) {
+  // Received pose from QueenBee and update waypoint destination
+  spdlog::info("RoboBeeSvc: Waypoint received");
 }
-void RoboBeeSvc::stopCapturing()
-{
-    _capturing = false;
-}
-bool RoboBeeSvc::isCapturing()
-{
-    return _capturing;
+
+void RoboBeeSvc::goToWaypoint() {
+  // fly to defined wp
 }
 
 } // namespace mls

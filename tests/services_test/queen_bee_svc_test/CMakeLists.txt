@@ -8,6 +8,9 @@ set(QUEENBEESVC_LIBRARY queen_bee_svc)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${${PROJ_MAIN_NAME}_PATH_MAIN}/modules/services/queen_bee_svc/include)
 include_directories(${KLEPSYDRA_INCLUDE_DIRS})
+include_directories(
+  ${${PROJ_MAIN_NAME}_PATH_MAIN}/modules/codegen/gen/melissa_codegen/poco/include
+)
 
 # Source
 # ---------------------------------------------------#
@@ -25,6 +28,7 @@ target_link_libraries(
   ${PROJ_NAME}
   gtest_main
   ${QUEENBEESVC_LIBRARY}
+  ${OpenCV_LIBS}
 )
 
 add_test(NAME ${PROJ_NAME} COMMAND ${PROJ_NAME})

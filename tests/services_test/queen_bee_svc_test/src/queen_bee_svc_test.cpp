@@ -7,7 +7,7 @@
 
 TEST(QueenBeeSvc, TestCase1) {
 
-  mls::QueenBeeSvc queenbee(nullptr, nullptr);
+  mls::QueenBeeSvc queenbee(nullptr, nullptr, nullptr);
 
-  std::cout << "TestCase1 completed." << std::endl;
+  spdlog::info("TestCase1 completed.");
 }

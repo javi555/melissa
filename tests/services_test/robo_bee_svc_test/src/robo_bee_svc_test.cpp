@@ -7,9 +7,7 @@
 
 TEST(RoboBeeSvc, TestCase1) {
 
-  mls::RoboBeeSvc robobee(nullptr, nullptr, 480, 240);
-  //robobee.startCapturing();
+  mls::RoboBeeSvc robobee(nullptr, nullptr, nullptr, 480, 240, "/var/tmp/images", false);
 
-  //ASSERT_TRUE(robobee.isCapturing());
-  std::cout << "TestCase1 completed." << std::endl;
+  spdlog::info("TestCase1 completed.");
 }

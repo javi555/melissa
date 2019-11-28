@@ -1,11 +1,11 @@
-class_name: mls::WaypointData
+class_name: mls::Waypoint
 middlewares:
     - type: ZMQ
       project_name: melissa_codegen
       already_exists: false
-      class_name: WaypointDataMessage
+      class_name: WaypointMessage
 fields:
-    - name   : id
+    - name   : seq
       type   : int32
     - name   : x
       type   : float32

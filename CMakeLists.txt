@@ -1,8 +1,7 @@
-# Main header: Project name & Configuration
-# ------------------------------------------------------------------------------
+
 cmake_minimum_required(VERSION 2.8.11)
 
-set(PROJ_MAIN_NAME "bee_service")
+set(PROJ_MAIN_NAME "melissa")
 project(${PROJ_MAIN_NAME})
 
 set(
@@ -23,7 +22,7 @@ endif ()
 # Install binaries
 if (DEFINED MAIN_INSTALL_PREFIX)
 else ()
-  set(MAIN_INSTALL_PREFIX $ENV{HOME}/install) # default install path
+  set(MAIN_INSTALL_PREFIX $ENV{HOME}/install)
 endif ()
 message(STATUS "Main install path: " ${MAIN_INSTALL_PREFIX})
 
@@ -35,12 +34,9 @@ message(STATUS "Thirdparties install path: " ${THIRDPARTIES_PATH})
 
 if (DEFINED GTEST_PATH)
 else ()
-  set(GTEST_PATH ${THIRDPARTIES_PATH}/googletest) # default google test path
+  set(GTEST_PATH ${THIRDPARTIES_PATH}/googletest)
 endif ()
 message(STATUS "Google test install path: " ${GTEST_PATH})
-
-# Configure variables
-# ------------------------------------------------------------------------------
 
 # Paths
 set(CMAKE_MODULE_PATH ${CMAKE_TEMPLATE_DIR}/cmake ${CMAKE_SOURCE_DIR}/cmake)
@@ -98,22 +94,16 @@ if (OpenCV_DIR STREQUAL NOT_FOUND)
   message(FATAL_ERROR "Install OpenCV")
 endif ()
 
-# Configuration current project
-# ------------------------------------------------------------------------------
-
 # Project Logic
 # ------------------------------------------------------------------------------
 if (NOT TARGET_PLATFORM STREQUAL TARGET_NONE)
-
-  # ############################################################################
-  # ADD SUB FOLDERS
-  # ############################################################################
   add_subdirectory(modules)
   add_subdirectory(tests)
-
 else ()
   message(
     FATAL_ERROR " TARGET no autodetected. Please, select a TARGET manually. "
   )
 endif ()
 
+file(GLOB_RECURSE KidlFiles "kidl/*.yaml")
+add_custom_target(kidl SOURCES ${KidlFiles})
