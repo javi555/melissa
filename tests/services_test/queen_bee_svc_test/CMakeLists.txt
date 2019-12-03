@@ -27,6 +27,7 @@ add_executable(${PROJ_NAME} ${${PROJ_NAME}_HEADERS} ${${PROJ_NAME}_SRC})
 target_link_libraries(
   ${PROJ_NAME}
   gtest_main
+  atomic
   ${QUEENBEESVC_LIBRARY}
   ${OpenCV_LIBS}
 )

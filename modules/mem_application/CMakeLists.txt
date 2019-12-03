@@ -34,6 +34,7 @@ target_link_libraries(
     kpsr_core_yaml 
     ${ROBOBEESVC_LIBRARY}
     ${QUEENBEESVC_LIBRARY}
+    ${OpenCV_LIBS}
 )
 
 install(

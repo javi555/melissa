@@ -12,8 +12,9 @@
 //   function to see if anything went wrong. (It will be zero if all is well.)
 //
 class FileUtils {
-   public:
-      static void getSortedListOfFilesInDir(std::string dirName, std::vector<std::string> * fileNameList);
+public:
+  static void getSortedListOfFilesInDir(std::string dirName,
+                                        std::vector<std::string> *fileNameList);
 };
 
 #endif

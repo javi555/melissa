@@ -10,14 +10,13 @@ RoboBeeSvc::RoboBeeSvc(
     : Service(environment, "robo_bee_service"),
       _imageDataPublisher(imageDataPublisher),
       _waypointSubscriber(waypointSubscriber), _imgWidth(witdh),
-      _imgHeigh(height), _imageDirname(imageDirname),
-      _restartIfNoMoreImages(restartIfNoMoreImages) {}
+      _imgHeigh(height), _imageDirname(imageDirname), _lastWpSeq(0),
+      _lastImageSeq(0), _restartIfNoMoreImages(restartIfNoMoreImages) {}
 
 void RoboBeeSvc::start() {
   _waypointSubscriber->registerListener(
       "WpRBSvc",
-      std::bind(&RoboBeeSvc::onWaypointReceived, this,
-                std::placeholders::_1));
+      std::bind(&RoboBeeSvc::onWaypointReceived, this, std::placeholders::_1));
 
   if (fileNameList == nullptr) {
     index = 2;
@@ -34,6 +33,7 @@ void RoboBeeSvc::execute() {
 
   _image.frameId = "frame";
   fullScaleImage = getImage();
+  _image.seq = ++_lastImageSeq;
   resize(fullScaleImage, _image.img, cvSize(_imgWidth, _imgHeigh));
   _imageDataPublisher->publish(_image);
   spdlog::info("RoboBeeSvc: Published Image");
@@ -64,8 +64,13 @@ cv::Mat RoboBeeSvc::getImage() {
 }
 
 void RoboBeeSvc::onWaypointReceived(const mls::Waypoint &wp) {
-  // Received pose from QueenBee and update waypoint destination
-  spdlog::info("RoboBeeSvc: Waypoint received");
+  if (_lastWpSeq < wp.seq) {
+    _lastWpSeq = wp.seq;
+    _waypoint = wp;
+    spdlog::info("RoboBeeSvc: new waypoint received");
+  } else {
+    spdlog::info("RoboBeeSvc: obsolete sequence number ");
+  }
 }
 
 void RoboBeeSvc::goToWaypoint() {

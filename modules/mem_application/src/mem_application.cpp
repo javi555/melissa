@@ -10,15 +10,16 @@
 
 int main(int argc, char **argv) {
 
+  if (argc != 3) {
+    spdlog::error("MemApp: Introduce number of images and configuration path");
+    return 0;
+  }
   int iters = std::stoi(argv[1]);
+  std::string yaml_path = argv[2];
 
   // 1.- Load config
 
-  std::string yaml_path =
-      "/home/javi/projects/melissa/modules/config/yaml/image.yaml"; // TODO: put
-                                                                    // this in a
-                                                                    // env var
-  kpsr::YamlEnvironment yamlEnv(yaml_path);
+  kpsr::YamlEnvironment yamlEnv(yaml_path + "/image.yaml");
 
   float imgWidth;
   float imgHeight;
@@ -40,8 +41,9 @@ int main(int argc, char **argv) {
   kpsr::Subscriber<kpsr::vision_ocv::ImageData> *imageDataSubscriber =
       eventloop.getSubscriber<kpsr::vision_ocv::ImageData>("ImageData");
   kpsr::Publisher<kpsr::vision_ocv::ImageData> *imageDataPublisher =
-      eventloop.getPublisher<kpsr::vision_ocv::ImageData>("ImageData", 0,
-                                                          nullptr, nullptr);
+      eventloop.getPublisher<kpsr::vision_ocv::ImageData>(
+          "ImageData", 0, nullptr,
+          nullptr); // 32 pool, (imgFactory) initFunc, clonerFunc
 
   kpsr::Subscriber<mls::Waypoint> *waypointSubscriber =
       eventloop.getSubscriber<mls::Waypoint>("Waypoint");
@@ -59,7 +61,7 @@ int main(int argc, char **argv) {
   queenBeeSvc.startup();
   spdlog::info("MemApp: QueenBee Service started");
 
-  for (int i=0;i<iters;i++) {
+  for (int i = 0; i < iters; i++) {
     roboBeeSvc.runOnce();
     queenBeeSvc.runOnce();
   }

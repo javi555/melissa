@@ -6,9 +6,14 @@
 #include <vector>
 
 #include "opencv2/core/core.hpp"
+#include "opencv2/highgui.hpp"
 #include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/imgproc.hpp"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/spdlog.h"
+#include <opencv2/core/matx.hpp>
+#include <opencv2/opencv.hpp>
 
 #include <klepsydra/core/environment.h>
 #include <klepsydra/core/publisher.h>
@@ -28,8 +33,11 @@ public:
 
   ~QueenBeeSvc(){};
 
-  mls::Waypoint calculateWaypointForImage(const kpsr::vision_ocv::ImageData);
-  void processImg();
+  mls::Waypoint
+  calculateWaypointForImage(const kpsr::vision_ocv::ImageData &img);
+  void processImg(const kpsr::vision_ocv::ImageData &img);
+
+  std::vector<cv::Vec3f> _circles;
 
 protected:
   void start() override;
