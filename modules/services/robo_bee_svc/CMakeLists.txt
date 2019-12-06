@@ -1,4 +1,4 @@
-set(PROJ_NAME robo_bee)
+set(PROJ_NAME robo_bee_svc)
 project(${PROJ_NAME})
 
 set( ${PROJ_MAIN_NAME}_PATH_INSTALL )
@@ -8,11 +8,16 @@ set( ${PROJ_MAIN_NAME}_PATH_INSTALL )
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${${PROJ_MAIN_NAME}_PATH_MAIN}/modules/include)
 include_directories(${KLEPSYDRA_INCLUDE_DIRS})
+include_directories(
+  ${${PROJ_MAIN_NAME}_PATH_MAIN}/modules/codegen/gen/melissa_codegen/poco/include
+)
 
 # Source
 # ---------------------------------------------------#
 file(GLOB ${PROJ_NAME}_SRC "src/*.cpp")
 file(GLOB ${PROJ_NAME}_HEADERS "include/*.h")
+file(GLOB ${PROJ_NAME}_GEN_HEADERS
+     "../codegen/gen/melissa_codegen/poco/include/*.h")
 
 # Create Library
 # ---------------------------------------------------#
@@ -21,6 +26,7 @@ add_library(
   ${${PROJ_MAIN_NAME}_LIB_TYPE}
   ${${PROJ_NAME}_HEADERS}
   ${${PROJ_NAME}_SRC}
+  ${${PROJ_NAME}_GEN_HEADERS}
 )
 
 # Link libraries with Project
@@ -31,6 +37,7 @@ target_link_libraries(
   ${PROJ_NAME}
   ${KLEPSYDRA_CORE_LIBRARIES}
   ${KLEPSYDRA_ROBOTICS_LIBRARIES}
+  ${OpenCV_LIBS}
 )
 
 

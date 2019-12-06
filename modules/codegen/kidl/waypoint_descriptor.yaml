@@ -1,0 +1,15 @@
+class_name: mls::Waypoint
+middlewares:
+    - type: ZMQ
+      project_name: melissa_codegen
+      already_exists: false
+      class_name: WaypointMessage
+fields:
+    - name   : seq
+      type   : int32
+    - name   : x
+      type   : float32
+    - name   : y
+      type   : float32
+    - name   : z
+      type   : float32

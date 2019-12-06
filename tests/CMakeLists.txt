@@ -12,5 +12,4 @@ add_subdirectory(${GTEST_PATH} ${CMAKE_BINARY_DIR}/googletest-build
 
 include_directories("${source_dir}/include")
 
-add_subdirectory(robo_bee_test)
-add_subdirectory(queen_bee_test)
+add_subdirectory(services_test)
