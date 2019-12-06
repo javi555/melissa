@@ -6,12 +6,13 @@ RoboBeeSvc::RoboBeeSvc(
     kpsr::Environment *environment,
     kpsr::Publisher<kpsr::vision_ocv::ImageData> *imageDataPublisher,
     kpsr::Subscriber<mls::Waypoint> *waypointSubscriber, int witdh, int height,
-    std::string imageDirname, bool restartIfNoMoreImages)
+    std::string imageDirname, bool restartIfNoMoreImages, int prefix)
     : Service(environment, "robo_bee_service"),
       _imageDataPublisher(imageDataPublisher),
-      _waypointSubscriber(waypointSubscriber), _imgWidth(witdh),
-      _imgHeigh(height), _imageDirname(imageDirname), _lastWpSeq(0),
-      _lastImageSeq(0), _restartIfNoMoreImages(restartIfNoMoreImages) {}
+      _waypointSubscriber(waypointSubscriber), _prefix(prefix),
+      _imgWidth(witdh), _imgHeigh(height), _imageDirname(imageDirname),
+      _lastWpSeq(0), _lastImageSeq(prefix*100000),
+      _restartIfNoMoreImages(restartIfNoMoreImages) {}
 
 void RoboBeeSvc::start() {
   _waypointSubscriber->registerListener(
@@ -36,7 +37,7 @@ void RoboBeeSvc::execute() {
   _image.seq = ++_lastImageSeq;
   resize(fullScaleImage, _image.img, cvSize(_imgWidth, _imgHeigh));
   _imageDataPublisher->publish(_image);
-  spdlog::info("RoboBeeSvc: Published Image");
+  spdlog::info("RoboBeeSvc: Published Image {}", _image.seq);
 }
 
 bool RoboBeeSvc::hasMoreImages() { return (index < (sz)); }

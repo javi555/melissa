@@ -23,6 +23,7 @@ int main(int argc, char **argv) {
 
   float imgWidth;
   float imgHeight;
+  int roboBeePrefix = 1;
 
   yamlEnv.getPropertyFloat("img_width", imgWidth);
   yamlEnv.getPropertyFloat("img_height", imgHeight);
@@ -53,7 +54,7 @@ int main(int argc, char **argv) {
   // 4.- Launch services
 
   mls::RoboBeeSvc roboBeeSvc(nullptr, imageDataPublisher, waypointSubscriber,
-                             imgWidth, imgHeight, "/var/tmp/images", true);
+                             imgWidth, imgHeight, "/var/tmp/images", true, roboBeePrefix);
   mls::QueenBeeSvc queenBeeSvc(nullptr, imageDataSubscriber, waypointPublisher);
 
   roboBeeSvc.startup();

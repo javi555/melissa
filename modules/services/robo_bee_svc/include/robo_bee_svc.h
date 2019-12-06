@@ -26,7 +26,8 @@ public:
   RoboBeeSvc(kpsr::Environment *environment,
              kpsr::Publisher<kpsr::vision_ocv::ImageData> *imageDataPublisher,
              kpsr::Subscriber<mls::Waypoint> *waypointSubscriber, int witdh,
-             int height, std::string imageDirname, bool restartIfNoMoreImages);
+             int height, std::string imageDirname, bool restartIfNoMoreImages,
+             int prefix);
 
   ~RoboBeeSvc(){};
 
@@ -44,6 +45,7 @@ private:
   void onWaypointReceived(const mls::Waypoint &wp);
   bool hasMoreImages();
   cv::Mat getImage();
+  int _prefix;
   kpsr::vision_ocv::ImageData _image;
   kpsr::Publisher<kpsr::vision_ocv::ImageData> *_imageDataPublisher;
   kpsr::Subscriber<mls::Waypoint> *_waypointSubscriber;
