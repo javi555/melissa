@@ -8,7 +8,8 @@ QueenBeeSvc::QueenBeeSvc(
     kpsr::Publisher<mls::Waypoint> *waypointPublisher)
     : Service(environment, "queen_bee_service"),
       _imageDataSubscriber(imageDataSubscriber),
-      _waypointPublisher(waypointPublisher) {}
+      _waypointPublisher(waypointPublisher),
+      _receivedImage(false) {}
 
 void QueenBeeSvc::start() {
   _imageDataSubscriber->registerListener(
@@ -26,6 +27,7 @@ void QueenBeeSvc::processImg(const kpsr::vision_ocv::ImageData &img) {
   HoughCircles(gray, _circles, cv::HOUGH_GRADIENT, 1, gray.rows / 16, 100, 30,
                1, 30);
   spdlog::info("number of circles: {}", _circles.size());
+  _receivedImage = false;
   return;
 }
 
@@ -35,6 +37,7 @@ void QueenBeeSvc::onImgReceived(const kpsr::vision_ocv::ImageData &img) {
   mls::Waypoint waypoint = calculateWaypointForImage(img);
   _waypointPublisher->publish(waypoint);
   spdlog::info("QueenBeeSvc: Published waypoint");
+  _receivedImage = true;
 }
 
 mls::Waypoint
