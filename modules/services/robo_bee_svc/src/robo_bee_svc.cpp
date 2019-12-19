@@ -19,35 +19,35 @@ void RoboBeeSvc::start() {
       "WpRBSvc",
       std::bind(&RoboBeeSvc::onWaypointReceived, this, std::placeholders::_1));
 
-  if (fileNameList == nullptr) {
-    index = 2;
-    fileNameList = new std::vector<std::string>();
-    FileUtils::getSortedListOfFilesInDir(_imageDirname, fileNameList);
-    sz = fileNameList->size();
-    spdlog::info("RoboBeeSvc: Read a list of {} images in folder: {}", sz - 2,
+  if (_fileNameList == nullptr) {
+    _index = 2;
+    _fileNameList = new std::vector<std::string>();
+    FileUtils::getSortedListOfFilesInDir(_imageDirname, _fileNameList);
+    _sz = _fileNameList->size();
+    spdlog::info("RoboBeeSvc: Read a list of {} images in folder: {}", _sz - 2,
                  _imageDirname);
   }
 }
-void RoboBeeSvc::stop() { fileNameList = nullptr; }
+void RoboBeeSvc::stop() { _fileNameList = nullptr; }
 
 void RoboBeeSvc::execute() {
 
   _image.frameId = "frame";
-  fullScaleImage = getImage();
+  _fullScaleImage = getImage();
   _image.seq = ++_lastImageSeq;
-  resize(fullScaleImage, _image.img, cvSize(_imgWidth, _imgHeigh));
+  resize(_fullScaleImage, _image.img, cvSize(_imgWidth, _imgHeigh));
   _imageDataPublisher->publish(_image);
   spdlog::info("RoboBeeSvc: Published Image {}", _image.seq);
 }
 
-bool RoboBeeSvc::hasMoreImages() { return (index < (sz)); }
+bool RoboBeeSvc::hasMoreImages() { return (_index < (_sz)); }
 
 cv::Mat RoboBeeSvc::getImage() {
   if (hasMoreImages()) {
     std::string image_path;
     image_path.append(_imageDirname);
     image_path.append("/");
-    image_path.append((*fileNameList)[index++]);
+    image_path.append((*_fileNameList)[_index++]);
     _fileImage = cv::imread(image_path);
     if (!_fileImage.data) {
       spdlog::warn("Could not open or find the image in{}", image_path);

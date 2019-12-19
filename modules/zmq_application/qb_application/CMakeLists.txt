@@ -20,11 +20,12 @@ include_directories(
   ${${PROJ_MAIN_NAME}_PATH_MAIN}/modules/codegen/gen/melissa_codegen/poco/include
 )
 
+file(GLOB ${PROJ_NAME}_HEADERS "include/*.h")
 file(GLOB ${PROJ_NAME}_SRC "src/*.cpp")
 
 link_directories(${${PROJ_MAIN_NAME}_PATH_LIBS})
 
-add_executable(${PROJ_NAME} ${${PROJ_NAME}_SRC})
+add_executable(${PROJ_NAME} ${${PROJ_NAME}_SRC}  ${${PROJ_NAME}_HEADERS})
 
 target_link_libraries(
     ${PROJ_NAME}

@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 
   // 1.- Load config
 
-  kpsr::YamlEnvironment yamlEnv(yaml_path + "/image.yaml");
+  kpsr::YamlEnvironment yamlEnv(yaml_path + "/rb_config.yaml");
 
   float imgWidth;
   float imgHeight;

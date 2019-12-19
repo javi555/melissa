@@ -87,16 +87,18 @@ Install openCV
 
 # Install klepsydra
 
-    rm -rf ~/thirdparties/klepsydra2
-    mkdir -p ~/thirdparties/klepsydra2
-    cd ~/thirdparties/klepsydra2
-    git clone https://github.com/klepsydra-technologies/kpsr-core ~/thirdparties/klepsydra2/kpsr-core
-    cd ~/thirdparties/klepsydra2/kpsr-core
+Delete previous klepsydra directory and create new one.
+
+    rm -rf ~/thirdparties/klepsydra
+    mkdir -p ~/thirdparties/klepsydra
+    cd ~/thirdparties/klepsydra
+    git clone https://github.com/klepsydra-technologies/kpsr-core ~/thirdparties/klepsydra/kpsr-core
+    cd ~/thirdparties/klepsydra/kpsr-core
     git submodule update --init
 
-    cd ~/thirdparties/klepsydra2/
-    git clone https://github.com/klepsydra-technologies/kpsr-robotics ~/thirdparties/klepsydra2/kpsr-robotics
-    cd ~/thirdparties/klepsydra2/kpsr-robotics
+    cd ~/thirdparties/klepsydra/
+    git clone https://github.com/klepsydra-technologies/kpsr-robotics ~/thirdparties/klepsydra/kpsr-robotics
+    cd ~/thirdparties/klepsydra/kpsr-robotics
     git submodule update --init
 
 klepsydra core & robotics compilation
@@ -107,28 +109,6 @@ Install boost & valgrind
 ------------------------
     sudo apt install libboost-all-dev
     sudo apt install valgrind
-
-Install open-license-mngr
--------------------------
-    cd ~/thirdparties/klepsydra2
-    git clone https://username@repository-open-license-manager.git
-    cd open-license-manager/
-    mkdir build
-    cd build
-    cmake .. -DCMAKE_INSTALL_PREFIX=../install
-    make
-    make install
-    cd ..
-    cd example
-    cmake .
-    make
-
-Generate license procedure
---------------------------
-Create klepsydra license using generator executable
-
-    user@hostname:~/.../bin$ ls
-    klepsydra.lic  license_generator
 
 Install kpsr-admin
 --------------------

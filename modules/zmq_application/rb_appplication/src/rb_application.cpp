@@ -15,29 +15,31 @@
 int main(int argc, char **argv)
 {
 
-  std::string yaml_path = "/home/javi/projects/melissa/modules/config/yaml";
+  std::string yaml_path = argv[1];
 
-  kpsr::YamlEnvironment yamlEnv(yaml_path + "/image.yaml");
+  kpsr::YamlEnvironment yamlEnv(yaml_path + "/rb_config.yaml");
 
-  std::string containerName = argc > 1 ? argv[1] : "RBApp";
-  std::string queenBeePort = argc > 2 ? argv[2] : "9001";
-  int adminPort = argc > 3 ? std::atoi(argv[3]) : 9090;
-  int systemPort = argc > 4 ? std::atoi(argv[4]) : 9292;
+  std::string containerName = argc > 2 ? argv[2] : "RBApp";
+  std::string queenBeePort = argc > 3 ? argv[3] : "9001";
+  int adminPort = argc > 4 ? std::atoi(argv[4]) : 9090;
+  int systemPort = argc > 5 ? std::atoi(argv[5]) : 9292;
 
   float imgWidth;
   float imgHeight;
-  int roboBeePrefix = 1;
+  int roboBeePrefix;
 
   yamlEnv.getPropertyFloat("img_width", imgWidth);
   yamlEnv.getPropertyFloat("img_height", imgHeight);
+  yamlEnv.getPropertyInt("robo_bee_prefix", roboBeePrefix);
 
-  spdlog::info("RBApp: loaded width: {:03.0f}", imgWidth);
-  spdlog::info("RBApp: loaded height: {:03.0f}", imgHeight);
+  spdlog::info("RBApp: width: {:03.0f}", imgWidth);
+  spdlog::info("RBApp: height: {:03.0f}", imgHeight);
+  spdlog::info("RBApp: robo_bee_prefix: {}", roboBeePrefix);
 
   // ZMQ socket
   std::string qbUrl = "tcp://*:" + queenBeePort;
   std::string topic = "image_data";
-  
+
   spdlog::info("qbURL: {}", qbUrl);
 
   //  Prepare context and publisher
@@ -46,10 +48,11 @@ int main(int argc, char **argv)
   publisher.bind(qbUrl);
 
   kpsr::zmq_mdlw::ToZMQMiddlewareProvider toZMQMiddlewareProvider(nullptr, publisher);
+
   kpsr::Publisher<kpsr::vision_ocv::ImageData> *toZMQPublisher = toZMQMiddlewareProvider
                                                                      .getBinaryToMiddlewareChannel<kpsr::vision_ocv::ImageData>(topic, 10);
 
-  mls::RoboBeeSvc roboBeeSvc(nullptr, toZMQPublisher, nullptr,
+  mls::RoboBeeSvc roboBeeSvc(&yamlEnv, toZMQPublisher, nullptr,
                              imgWidth, imgHeight, "/var/tmp/images", true, roboBeePrefix);
 
   roboBeeSvc.startup();
