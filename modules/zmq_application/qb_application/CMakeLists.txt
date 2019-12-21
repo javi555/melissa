@@ -32,11 +32,14 @@ target_link_libraries(
     gtest_main
     atomic
     yaml-cpp
-    kpsr_core_yaml 
-    kpsr_vision_ocv 
+    kpsr_core_yaml
+    kpsr_vision_ocv
+    kpsr_socket_interface
+    kpsr_admin
+    kpsr_admin_system
+    libzmq
     ${QUEENBEESVC_LIBRARY}
     ${OpenCV_LIBS}
-    libzmq
 )
 
 install(

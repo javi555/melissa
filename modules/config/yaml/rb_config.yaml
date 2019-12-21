@@ -3,3 +3,7 @@ img_width: 320
 img_height: 240
 restart_if_no_more_images: true
 robo_bee_prefix: 1
+image_topic: "image_data"
+pool_size: 10
+server_admin_port: 9191
+server_system_port: 9393

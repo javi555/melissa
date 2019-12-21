@@ -17,10 +17,20 @@ public:
 
     ~ZmqMiddlewareFacility(){};
 
-    void stop(std::string topic);
+    void stop();
 
-    kpsr::Subscriber<kpsr::vision_ocv::ImageData> *imageDataSubscriber;
-    kpsr::Publisher<kpsr::vision_ocv::ImageData> *imageDataPublisher;
+    kpsr::Subscriber<kpsr::vision_ocv::ImageData> *_imageDataSubscriber;
+    kpsr::Publisher<kpsr::vision_ocv::ImageData> *_imageDataPublisher;
     kpsr::zmq_mdlw::FromZmqChannel<Base> *_binaryFromZMQProvider;
+    kpsr::zmq_mdlw::FromZmqMiddlewareProvider _fromZmqMiddlewareProvider;
+    
+    zmq::socket_t _subscriber;
+    kpsr::vision_ocv::ImageDataFactory _factory;
+
+    zmq::context_t &_context;
+    std::string _rbUrl;
+    std::string _topic;
+    int _poolSize;
+    kpsr::high_performance::EventLoopMiddlewareProvider<16> &_eventloop;
 };
 #endif // ZMQMIDDLEWAREFACILITY_H

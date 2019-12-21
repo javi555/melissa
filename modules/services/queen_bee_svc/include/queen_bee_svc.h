@@ -38,7 +38,6 @@ public:
   void processImg(const kpsr::vision_ocv::ImageData &img);
 
   std::vector<cv::Vec3f> _circles;
-  bool _receivedImage;
 
 protected:
   void start() override;

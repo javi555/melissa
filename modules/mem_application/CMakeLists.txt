@@ -31,7 +31,8 @@ target_link_libraries(
     gtest_main
     atomic
     yaml-cpp
-    kpsr_core_yaml 
+    kpsr_core_yaml
+    kpsr_vision_ocv
     ${ROBOBEESVC_LIBRARY}
     ${QUEENBEESVC_LIBRARY}
     ${OpenCV_LIBS}

@@ -19,7 +19,9 @@ include_directories(${KLEPSYDRA_INCLUDE_DIRS})
 include_directories(
   ${${PROJ_MAIN_NAME}_PATH_MAIN}/modules/codegen/gen/melissa_codegen/poco/include
 )
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/${PROJ_MAIN_NAME}/modules/zmq_mdlw/include )
+include_directories(
+  ${${PROJ_MAIN_NAME}_PATH_MAIN}/modules/zmq_application/qb_application/include
+)
 
 file(GLOB ${PROJ_NAME}_SRC "src/*.cpp")
 file(GLOB ${PROJ_NAME}_HEADERS
@@ -37,9 +39,12 @@ target_link_libraries(
     yaml-cpp
     kpsr_core_yaml 
     kpsr_vision_ocv 
+    kpsr_socket_interface
+    kpsr_admin
+    kpsr_admin_system
+    libzmq
     ${ROBOBEESVC_LIBRARY}
     ${OpenCV_LIBS}
-    libzmq
 )
 
 install(
