@@ -11,7 +11,7 @@ RoboBeeSvc::RoboBeeSvc(
       _imageDataPublisher(imageDataPublisher),
       _waypointSubscriber(waypointSubscriber), _prefix(prefix),
       _imgWidth(witdh), _imgHeigh(height), _imageDirname(imageDirname),
-      _lastWpSeq(0), _lastImageSeq(prefix * 100000),
+      _lastWpSeq(0), _lastImageSeq(prefix),
       _restartIfNoMoreImages(restartIfNoMoreImages) {}
 
 void RoboBeeSvc::start()
@@ -87,6 +87,7 @@ void RoboBeeSvc::onWaypointReceived(const mls::Waypoint &wp)
     _lastWpSeq = wp.seq;
     _waypoint = wp;
     spdlog::info("RoboBeeSvc: new waypoint received");
+    goToWaypoint(_waypoint);
   }
   else
   {
@@ -94,9 +95,9 @@ void RoboBeeSvc::onWaypointReceived(const mls::Waypoint &wp)
   }
 }
 
-void RoboBeeSvc::goToWaypoint()
+void RoboBeeSvc::goToWaypoint(const mls::Waypoint &waypoint)
 {
-  // fly to defined wp
+  // fly to waypoint.x waypoint.y waypoint.z
 }
 
 } // namespace mls

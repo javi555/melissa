@@ -31,7 +31,7 @@ public:
 
   ~RoboBeeSvc(){};
 
-  void goToWaypoint();
+  void goToWaypoint(const mls::Waypoint &waypoint);
 
   mls::Waypoint _waypoint;
 

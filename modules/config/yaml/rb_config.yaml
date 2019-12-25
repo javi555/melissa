@@ -2,7 +2,8 @@ file_images_path: "/var/tmp/images"
 img_width: 320
 img_height: 240
 restart_if_no_more_images: true
-robo_bee_prefix: 1
+robo_bee_prefix: 100000
+img_cv_type: 16
 image_topic: "image_data"
 pool_size: 10
 server_admin_port: 9191

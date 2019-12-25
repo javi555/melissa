@@ -6,6 +6,7 @@ project(${PROJ_NAME})
 add_definitions(-std=c++11)
 
 find_package(Klepsydra REQUIRED)
+find_package(KlepsydraRobotics REQUIRED)
 find_package(cppzmq REQUIRED)
 
 set(MAIN_INSTALL_PREFIX $ENV{HOME}/install)
@@ -15,6 +16,7 @@ set(QUEENBEESVC_LIBRARY queen_bee_svc)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories(${${PROJ_MAIN_NAME}_PATH_MAIN}/modules/services/queen_bee_svc/include)
+include_directories(${${PROJ_MAIN_NAME}_PATH_MAIN}/modules/zmq_application/common)
 include_directories(${KLEPSYDRA_INCLUDE_DIRS})
 include_directories(
   ${${PROJ_MAIN_NAME}_PATH_MAIN}/modules/codegen/gen/melissa_codegen/poco/include
@@ -32,11 +34,12 @@ target_link_libraries(
     gtest_main
     atomic
     yaml-cpp
-    kpsr_core_yaml
+    ${KLEPSYDRA_CORE_LIBRARIES}
+    ${KLEPSYDRA_ROBOTICS_CORE_LIBRARIES}
     kpsr_vision_ocv
-    kpsr_socket_interface
     kpsr_admin
     kpsr_admin_system
+    kpsr_socket_interface
     libzmq
     ${QUEENBEESVC_LIBRARY}
     ${OpenCV_LIBS}

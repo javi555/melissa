@@ -4,17 +4,22 @@
 ZmqMiddlewareFacility::ZmqMiddlewareFacility(zmq::context_t &context,
                                              std::string rbUrl, std::string topic,
                                              kpsr::high_performance::EventLoopMiddlewareProvider<16> &eventloop,
-                                             int poolSize)
-    : _context(context), _rbUrl(rbUrl), _topic(topic), _eventloop(eventloop), _poolSize(poolSize)
-    , _imageDataSubscriber(nullptr), _imageDataPublisher(nullptr), _binaryFromZMQProvider(nullptr)
-    , _fromZmqMiddlewareProvider(), _subscriber(_context, ZMQ_SUB), _factory(320, 240, 10, "body")
+                                             int poolSize, kpsr::vision_ocv::ImageDataFactory &factory)
+    : _rbUrl(rbUrl),
+      _topic(topic),
+      _eventloop(eventloop),
+      _poolSize(poolSize), _imageDataSubscriber(nullptr),
+      _imageDataPublisher(nullptr),
+      _binaryFromZMQProvider(nullptr), _fromZmqMiddlewareProvider(),
+      _subscriber(context, ZMQ_SUB),
+      _factory(factory)
 {
     _subscriber.connect(_rbUrl);
 
     _subscriber.setsockopt(ZMQ_SUBSCRIBE, _topic.c_str(), _topic.size());
 
     _binaryFromZMQProvider = _fromZmqMiddlewareProvider
-                                 .getBinaryFromMiddlewareChannel<kpsr::vision_ocv::ImageData>(_subscriber, 10);
+                                 .getBinaryFromMiddlewareChannel<kpsr::vision_ocv::ImageData>(_subscriber, _poolSize);
 
     _binaryFromZMQProvider->start();
     _imageDataSubscriber =

@@ -3,23 +3,30 @@
 #include <klepsydra/core/yaml_environment.h>
 #include <klepsydra/socket_interface/hp_socket_admin_container_provider.h>
 #include <klepsydra/socket_interface/hp_socket_system_container_provider.h>
+#include <klepsydra/vision_ocv/image_data_factory.h>
 #include "zmq_middleware_facility.h"
+#include "config.h"
 
 int main(int argc, char **argv)
 {
-  static const int EVENT_LOOP_SIZE = 16;
 
   std::string yamlFile = argv[1];
   kpsr::YamlEnvironment yamlEnv(yamlFile);
 
   std::string containerName = argc > 2 ? argv[2] : "QBApp";
-  std::string roboBeePort = argc > 3 ? argv[3] : "9001";
+  std::string roboBeeImgPort = argc > 3 ? argv[3] : "9001";
+  std::string roboBeeWpPort = argc > 4 ? argv[4] : "9002";
 
   std::string imageTopic;
   int poolSize;
-  std::string rbUrl = "tcp://*:" + roboBeePort;
+  int imgWidth;
+  int imgHeight;
+  std::string rbImgUrl = "tcp://localhost:" + roboBeeImgPort;
+  std::string rbWpUrl = "tcp://localhost:" + roboBeeWpPort;
 
   yamlEnv.getPropertyString("image_topic", imageTopic);
+  yamlEnv.getPropertyInt("img_height", imgHeight);
+  yamlEnv.getPropertyInt("img_width", imgWidth);
   yamlEnv.getPropertyInt("pool_size", poolSize);
 
   kpsr::high_performance::EventLoopMiddlewareProvider<128> adminEventLoop(nullptr);
@@ -28,7 +35,7 @@ int main(int argc, char **argv)
   kpsr::admin::socket_mdlw::EventLoopSocketAdminContainerProvider<128> adminProvider(adminPort,
                                                                                      adminEventLoop,
                                                                                      &yamlEnv,
-                                                                                     "admin_server");
+                                                                                     "QBApp_admin");
 
   kpsr::high_performance::EventLoopMiddlewareProvider<128> systemEventLoop(nullptr);
   int systemPort;
@@ -36,23 +43,30 @@ int main(int argc, char **argv)
   kpsr::admin::socket_mdlw::EventLoopSocketSystemContainerProvider<128> systemProvider(systemPort,
                                                                                     systemEventLoop,
                                                                                     &yamlEnv,
-                                                                                    "system_server");
+                                                                                    "QBApp_system");
   adminEventLoop.start();
   adminProvider.start();
   systemProvider.start();
 
-  kpsr::high_performance::EventLoopMiddlewareProvider<EVENT_LOOP_SIZE> eventloop(nullptr);
+  kpsr::high_performance::EventLoopMiddlewareProvider<EVENT_LOOP_SIZE> eventloop(&adminProvider.getContainer());
   eventloop.start();
 
-  spdlog::info("robobee_URL: {}", rbUrl);
+  spdlog::info("EventLoopSize: {}", EVENT_LOOP_SIZE);
+
+  spdlog::info("robobee_URL: {}", rbImgUrl);
   spdlog::info("image_topic: {}", imageTopic);
   spdlog::info("pool_size: {}", poolSize);
   spdlog::info("server_admin_port: {}", adminPort);
   spdlog::info("server_system_port {}", systemPort);
 
+  kpsr::vision_ocv::ImageDataFactory _factory(imgWidth, imgHeight, 0, "frame");
+
+  kpsr::Publisher<mls::Waypoint> *waypointPublisher =
+      eventloop.getPublisher<mls::Waypoint>("Waypoint", 0, nullptr, nullptr);
+
   zmq::context_t context(1);
-  ZmqMiddlewareFacility zmf(context, rbUrl, imageTopic, eventloop, poolSize);
-  mls::QueenBeeSvc queenBeeSvc(&yamlEnv, zmf._imageDataSubscriber, nullptr);
+  ZmqMiddlewareFacility zmf(context, rbImgUrl, imageTopic, eventloop, poolSize, _factory);
+  mls::QueenBeeSvc queenBeeSvc(&yamlEnv, zmf._imageDataSubscriber, waypointPublisher);
 
   queenBeeSvc.startup();
   spdlog::info("QBApp: QueenBee Service started");
@@ -60,6 +74,7 @@ int main(int argc, char **argv)
   while (true)
   {
     queenBeeSvc.runOnce();
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
   }
   queenBeeSvc.shutdown();
 

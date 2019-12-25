@@ -1,4 +1,6 @@
 image_topic: "image_data"
+img_width: 320
+img_height: 240
 pool_size: 10
 server_admin_port: 9090
 server_system_port: 9292

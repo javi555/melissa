@@ -22,33 +22,45 @@ int main(int argc, char **argv) {
 
   int imgWidth;
   int imgHeight;
-  int roboBeePrefix = 1;
+  int poolSize;
+  int roboBeePrefix;
+  int imgCvType;
+  std::string fileImagesPath;
 
+
+  yamlEnv.getPropertyString("file_images_path", fileImagesPath);
   yamlEnv.getPropertyInt("img_width", imgWidth);
   yamlEnv.getPropertyInt("img_height", imgHeight);
+  yamlEnv.getPropertyInt("pool_size", poolSize);
+  yamlEnv.getPropertyInt("robo_bee_prefix", roboBeePrefix);
+  yamlEnv.getPropertyInt("img_cv_type", imgCvType);
 
+  spdlog::info("MemApp: loaded fileImagesPath: {}", fileImagesPath);
   spdlog::info("MemApp: loaded width: {}", imgWidth);
   spdlog::info("MemApp: loaded height: {}", imgHeight);
+  spdlog::info("MemApp: loaded pooSize: {}", poolSize);
+  spdlog::info("MemApp: loaded roboBeePrefix: {}", roboBeePrefix);
+  spdlog::info("MemApp: loaded imgCvType: {}", imgCvType);
 
   kpsr::high_performance::EventLoopMiddlewareProvider<16> eventloop(nullptr);
 
   eventloop.start();
 
-  kpsr::vision_ocv::ImageDataFactory factory(320, 240, 10, "frame");
+  kpsr::vision_ocv::ImageDataFactory factory(imgWidth, imgHeight, imgCvType, "frame");
 
   kpsr::Subscriber<kpsr::vision_ocv::ImageData> *imageDataSubscriber =
       eventloop.getSubscriber<kpsr::vision_ocv::ImageData>("ImageData");
   kpsr::Publisher<kpsr::vision_ocv::ImageData> *imageDataPublisher =
       eventloop.getPublisher<kpsr::vision_ocv::ImageData>(
-          "ImageData", 10, factory.initializerFunction, factory.eventClonerFunction);
+          "ImageData", poolSize, factory.initializerFunction, factory.eventClonerFunction);
 
   kpsr::Subscriber<mls::Waypoint> *waypointSubscriber =
       eventloop.getSubscriber<mls::Waypoint>("Waypoint");
   kpsr::Publisher<mls::Waypoint> *waypointPublisher =
-      eventloop.getPublisher<mls::Waypoint>("Waypoint", 10, nullptr, nullptr);
+      eventloop.getPublisher<mls::Waypoint>("Waypoint", 0, nullptr, nullptr);
 
   mls::RoboBeeSvc roboBeeSvc(&yamlEnv, imageDataPublisher, waypointSubscriber,
-                             imgWidth, imgHeight, "/var/tmp/images", true, roboBeePrefix);
+                             imgWidth, imgHeight, fileImagesPath, true, roboBeePrefix);
   mls::QueenBeeSvc queenBeeSvc(&yamlEnv, imageDataSubscriber, waypointPublisher);
 
   roboBeeSvc.startup();
