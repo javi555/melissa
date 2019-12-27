@@ -6,56 +6,62 @@
 #include <klepsydra/core/publisher.h>
 #include <klepsydra/core/subscriber.h>
 #include <klepsydra/core/yaml_environment.h>
+#include <klepsydra/vision_ocv/image_data_factory.h>
 #include <klepsydra/high_performance/event_loop_middleware_provider.h>
 
 int main(int argc, char **argv) {
 
   if (argc != 3) {
-    spdlog::error("MemApp: Introduce number of images and configuration path");
+    spdlog::error("MemApp: Pass number of iterations and rb_config.yaml path");
     return 0;
   }
   int iters = std::stoi(argv[1]);
-  std::string yaml_path = argv[2];
+  std::string yamlFile = argv[2];
 
-  // 1.- Load config
+  kpsr::YamlEnvironment yamlEnv(yamlFile);
 
-  kpsr::YamlEnvironment yamlEnv(yaml_path + "/image.yaml");
+  int imgWidth;
+  int imgHeight;
+  int poolSize;
+  int roboBeePrefix;
+  int imgCvType;
+  std::string fileImagesPath;
 
-  float imgWidth;
-  float imgHeight;
-  int roboBeePrefix = 1;
 
-  yamlEnv.getPropertyFloat("img_width", imgWidth);
-  yamlEnv.getPropertyFloat("img_height", imgHeight);
+  yamlEnv.getPropertyString("file_images_path", fileImagesPath);
+  yamlEnv.getPropertyInt("img_width", imgWidth);
+  yamlEnv.getPropertyInt("img_height", imgHeight);
+  yamlEnv.getPropertyInt("pool_size", poolSize);
+  yamlEnv.getPropertyInt("robo_bee_prefix", roboBeePrefix);
+  yamlEnv.getPropertyInt("img_cv_type", imgCvType);
 
-  spdlog::info("MemApp: loaded width: {:03.0f}", imgWidth);
-  spdlog::info("MemApp: loaded height: {:03.0f}", imgHeight);
-
-  // 2.- Create EventLoop
+  spdlog::info("MemApp: loaded fileImagesPath: {}", fileImagesPath);
+  spdlog::info("MemApp: loaded width: {}", imgWidth);
+  spdlog::info("MemApp: loaded height: {}", imgHeight);
+  spdlog::info("MemApp: loaded pooSize: {}", poolSize);
+  spdlog::info("MemApp: loaded roboBeePrefix: {}", roboBeePrefix);
+  spdlog::info("MemApp: loaded imgCvType: {}", imgCvType);
 
   kpsr::high_performance::EventLoopMiddlewareProvider<16> eventloop(nullptr);
 
   eventloop.start();
 
-  // 3.- Publishers and subscribers
+  kpsr::vision_ocv::ImageDataFactory factory(imgWidth, imgHeight, imgCvType, "frame");
 
   kpsr::Subscriber<kpsr::vision_ocv::ImageData> *imageDataSubscriber =
       eventloop.getSubscriber<kpsr::vision_ocv::ImageData>("ImageData");
   kpsr::Publisher<kpsr::vision_ocv::ImageData> *imageDataPublisher =
       eventloop.getPublisher<kpsr::vision_ocv::ImageData>(
-          "ImageData", 0, nullptr,
-          nullptr); // 32 pool, (imgFactory) initFunc, clonerFunc
+          "ImageData", poolSize, factory.initializerFunction, factory.eventClonerFunction);
 
   kpsr::Subscriber<mls::Waypoint> *waypointSubscriber =
       eventloop.getSubscriber<mls::Waypoint>("Waypoint");
   kpsr::Publisher<mls::Waypoint> *waypointPublisher =
       eventloop.getPublisher<mls::Waypoint>("Waypoint", 0, nullptr, nullptr);
 
-  // 4.- Launch services
-
-  mls::RoboBeeSvc roboBeeSvc(nullptr, imageDataPublisher, waypointSubscriber,
-                             imgWidth, imgHeight, "/var/tmp/images", true, roboBeePrefix);
-  mls::QueenBeeSvc queenBeeSvc(nullptr, imageDataSubscriber, waypointPublisher);
+  mls::RoboBeeSvc roboBeeSvc(&yamlEnv, imageDataPublisher, waypointSubscriber,
+                             imgWidth, imgHeight, fileImagesPath, true, roboBeePrefix);
+  mls::QueenBeeSvc queenBeeSvc(&yamlEnv, imageDataSubscriber, waypointPublisher);
 
   roboBeeSvc.startup();
   spdlog::info("MemApp: RoboBee Service started");

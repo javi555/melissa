@@ -41,7 +41,7 @@ TEST(QueenBeeSvc, TestCase1Image) {
 
   queenBeeSvc.shutdown();
 
-  ASSERT_NE(queenBeeSvc._circles.size(), 0); // test image processed
+  ASSERT_NE(queenBeeSvc._circles.size(), 0);
 
   spdlog::info("TestCase1Image completed.");
 }

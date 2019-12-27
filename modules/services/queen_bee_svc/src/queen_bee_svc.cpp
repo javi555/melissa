@@ -8,7 +8,7 @@ QueenBeeSvc::QueenBeeSvc(
     kpsr::Publisher<mls::Waypoint> *waypointPublisher)
     : Service(environment, "queen_bee_service"),
       _imageDataSubscriber(imageDataSubscriber),
-      _waypointPublisher(waypointPublisher) {}
+      _waypointPublisher(waypointPublisher){}
 
 void QueenBeeSvc::start() {
   _imageDataSubscriber->registerListener(

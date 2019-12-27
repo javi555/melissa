@@ -21,8 +21,8 @@ TEST(RoboBeeSvc, TestCase1Waypoint) {
 
   kpsr::mem::MemEnv environment;
 
-  float imgWidth = 320;
-  float imgHeight = 240;
+  int imgWidth = 320;
+  int imgHeight = 240;
 
   mls::RoboBeeSvc roboBeeSvc(&environment, imageDataProvider.getPublisher(),
                              waypointProvider.getSubscriber(), imgWidth,

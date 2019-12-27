@@ -31,7 +31,7 @@ public:
 
   ~RoboBeeSvc(){};
 
-  void goToWaypoint();
+  void goToWaypoint(const mls::Waypoint &waypoint);
 
   mls::Waypoint _waypoint;
 
@@ -44,23 +44,21 @@ private:
   void create();
   void onWaypointReceived(const mls::Waypoint &wp);
   bool hasMoreImages();
-  cv::Mat getImage();
+  void getImage(cv::Mat &img);
   int _prefix;
   kpsr::vision_ocv::ImageData _image;
   kpsr::Publisher<kpsr::vision_ocv::ImageData> *_imageDataPublisher;
   kpsr::Subscriber<mls::Waypoint> *_waypointSubscriber;
-  std::string fileImagesPath;
-  float _imgWidth;
-  float _imgHeigh;
-  cv::Mat fullScaleImage;
+  std::string _fileImagesPath;
+  int _imgWidth;
+  int _imgHeigh;
   int _lastImageSeq;
   int _lastWpSeq;
   std::string _imageDirname;
   bool _restartIfNoMoreImages;
-  cv::Mat _fileImage;
-  std::vector<std::string> *fileNameList = nullptr;
-  unsigned index;
-  std::vector<int>::size_type sz;
+  std::vector<std::string> *_fileNameList = nullptr;
+  unsigned _index;
+  std::vector<int>::size_type _sz;
 };
 
 } // namespace mls

@@ -1,7 +1,7 @@
 #include "robo_bee_svc.h"
 
-namespace mls {
-
+namespace mls
+{
 RoboBeeSvc::RoboBeeSvc(
     kpsr::Environment *environment,
     kpsr::Publisher<kpsr::vision_ocv::ImageData> *imageDataPublisher,
@@ -11,71 +11,93 @@ RoboBeeSvc::RoboBeeSvc(
       _imageDataPublisher(imageDataPublisher),
       _waypointSubscriber(waypointSubscriber), _prefix(prefix),
       _imgWidth(witdh), _imgHeigh(height), _imageDirname(imageDirname),
-      _lastWpSeq(0), _lastImageSeq(prefix*100000),
+      _lastWpSeq(0), _lastImageSeq(prefix),
       _restartIfNoMoreImages(restartIfNoMoreImages) {}
 
-void RoboBeeSvc::start() {
+void RoboBeeSvc::start()
+{
   _waypointSubscriber->registerListener(
       "WpRBSvc",
       std::bind(&RoboBeeSvc::onWaypointReceived, this, std::placeholders::_1));
-
-  if (fileNameList == nullptr) {
-    index = 2;
-    fileNameList = new std::vector<std::string>();
-    FileUtils::getSortedListOfFilesInDir(_imageDirname, fileNameList);
-    sz = fileNameList->size();
-    spdlog::info("RoboBeeSvc: Read a list of {} images in folder: {}", sz - 2,
-                 _imageDirname);
+  if (_fileNameList == nullptr)
+  {
+    _index = 2;
+    _fileNameList = new std::vector<std::string>();
+    FileUtils::getSortedListOfFilesInDir(_imageDirname, _fileNameList);
+    _sz = _fileNameList->size();
+    spdlog::debug("RoboBeeSvc: Read a list of {} images in folder: {}", _sz - 2,
+                  _imageDirname);
   }
 }
-void RoboBeeSvc::stop() { fileNameList = nullptr; }
 
-void RoboBeeSvc::execute() {
+void RoboBeeSvc::stop()
+{
+  _fileNameList->clear();
+  _fileNameList = nullptr;
+}
 
+void RoboBeeSvc::execute()
+{
   _image.frameId = "frame";
-  fullScaleImage = getImage();
   _image.seq = ++_lastImageSeq;
-  resize(fullScaleImage, _image.img, cvSize(_imgWidth, _imgHeigh));
+  getImage(_image.img);
+
+  if (_image.img.cols != _imgWidth || _image.img.rows != _imgHeigh)
+  {
+    spdlog::warn("RoboBeeSvc: Width or heigh of the image should be: {} {}", _imgWidth, _imgHeigh);
+    return;
+  }
   _imageDataPublisher->publish(_image);
   spdlog::info("RoboBeeSvc: Published Image {}", _image.seq);
 }
 
-bool RoboBeeSvc::hasMoreImages() { return (index < (sz)); }
+bool RoboBeeSvc::hasMoreImages() { return (_index < (_sz)); }
 
-cv::Mat RoboBeeSvc::getImage() {
-  if (hasMoreImages()) {
+void RoboBeeSvc::getImage(cv::Mat &img)
+{
+  if (hasMoreImages())
+  {
     std::string image_path;
     image_path.append(_imageDirname);
     image_path.append("/");
-    image_path.append((*fileNameList)[index++]);
-    _fileImage = cv::imread(image_path);
-    if (!_fileImage.data) {
+    image_path.append((*_fileNameList)[_index++]);
+    img = cv::imread(image_path);
+    if (!img.data)
+    {
       spdlog::warn("Could not open or find the image in{}", image_path);
     }
-
-    return _fileImage;
-
-  } else {
-    if (_restartIfNoMoreImages) {
+    return;
+  }
+  else
+  {
+    if (_restartIfNoMoreImages)
+    {
       this->stop();
       this->start();
-      return getImage();
+      getImage(img);
+      return;
     }
   }
 }
 
-void RoboBeeSvc::onWaypointReceived(const mls::Waypoint &wp) {
-  if (_lastWpSeq < wp.seq) {
+void RoboBeeSvc::onWaypointReceived(const mls::Waypoint &wp)
+{
+  if (_lastWpSeq < wp.seq)
+  {
     _lastWpSeq = wp.seq;
     _waypoint = wp;
     spdlog::info("RoboBeeSvc: new waypoint received");
-  } else {
+    goToWaypoint(_waypoint);
+  }
+  else
+  {
     spdlog::info("RoboBeeSvc: obsolete sequence number ");
   }
 }
 
-void RoboBeeSvc::goToWaypoint() {
-  // fly to defined wp
+void RoboBeeSvc::goToWaypoint(const mls::Waypoint &waypoint)
+{
+  // fly to waypoint.x waypoint.y waypoint.z
 }
 
 } // namespace mls
