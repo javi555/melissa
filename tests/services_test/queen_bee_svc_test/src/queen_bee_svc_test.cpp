@@ -27,7 +27,7 @@ TEST(QueenBeeSvc, TestCase1Image) {
   mls::QueenBeeSvc queenBeeSvc(&environment, imageDataProvider.getSubscriber(),
                                waypointProvider.getPublisher());
 
-  std::string image_path = "/var/tmp/images/dillenia.jpg";
+  std::string image_path = "/home/javi/projects/melissa/tests/data/dillenia.jpg";
   kpsr::vision_ocv::ImageData testImg;
   testImg.img = cv::imread(image_path);
   ;

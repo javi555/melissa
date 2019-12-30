@@ -1,6 +1,11 @@
 image_topic: "image_data"
+waypoint_topic: "waypoint_topic"
 img_width: 320
 img_height: 240
-pool_size: 10
+pool_size: 256
+rb_img_url: "tcp://localhost:9001"
+rb_wp_url: "tcp://*:9002"
+container_admin_name: "QBApp_admin"
+container_system_name: "QBApp_system"
 server_admin_port: 9090
-server_system_port: 9292
+server_system_port: 9191
