@@ -29,7 +29,6 @@ int main(int argc, char **argv)
   std::string qbImgUrl;
   std::string qbWpUrl;
   std::string containerAdminName;
-  std::string containerSystemName;
 
   yamlEnv.getPropertyString("qb_img_url", qbImgUrl);
   yamlEnv.getPropertyString("qb_wp_url", qbWpUrl);
@@ -41,7 +40,6 @@ int main(int argc, char **argv)
   yamlEnv.getPropertyString("file_images_path", fileImagesPath);
   yamlEnv.getPropertyInt("pool_size", poolSize);
   yamlEnv.getPropertyString("container_admin_name", containerAdminName);
-  yamlEnv.getPropertyString("container_system_name", containerSystemName);
 
   kpsr::high_performance::EventLoopMiddlewareProvider<128> adminEventLoop(nullptr);
   int adminPort;
@@ -51,13 +49,12 @@ int main(int argc, char **argv)
                                                                                      &yamlEnv,
                                                                                      containerAdminName);
 
-  kpsr::high_performance::EventLoopMiddlewareProvider<128> systemEventLoop(nullptr);
   int systemPort;
   yamlEnv.getPropertyInt("server_system_port", systemPort);
   kpsr::admin::socket_mdlw::EventLoopSocketSystemContainerProvider<128> systemProvider(systemPort,
-                                                                                       systemEventLoop,
+                                                                                       adminEventLoop,
                                                                                        &yamlEnv,
-                                                                                       containerSystemName);
+                                                                                       containerAdminName);
   adminEventLoop.start();
   adminProvider.start();
   systemProvider.start();
@@ -113,7 +110,7 @@ int main(int argc, char **argv)
 
   mls::RoboBeeSvc roboBeeSvc(&yamlEnv, toZMQPublisher, waypointSubscriber,
                              imgWidth, imgHeight, fileImagesPath, true, roboBeePrefix);
-
+  adminProvider.getContainer().attach(&roboBeeSvc);
   roboBeeSvc.startup();
   spdlog::info("RBApp: RoboBee Service started");
 

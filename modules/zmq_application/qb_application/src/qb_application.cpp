@@ -19,7 +19,6 @@ int main(int argc, char **argv)
   std::string rbImgUrl;
   std::string rbWpUrl;
   std::string containerAdminName;
-  std::string containerSystemName;
 
   yamlEnv.getPropertyString("rb_img_url", rbImgUrl);
   yamlEnv.getPropertyString("rb_wp_url", rbWpUrl);
@@ -29,7 +28,6 @@ int main(int argc, char **argv)
   yamlEnv.getPropertyInt("img_width", imgWidth);
   yamlEnv.getPropertyInt("pool_size", poolSize);
   yamlEnv.getPropertyString("container_admin_name", containerAdminName);
-  yamlEnv.getPropertyString("container_system_name", containerSystemName);
 
   kpsr::high_performance::EventLoopMiddlewareProvider<CONTAINER_SIZE> adminEventLoop(nullptr);
   int adminPort;
@@ -39,13 +37,12 @@ int main(int argc, char **argv)
                                                                                                 &yamlEnv,
                                                                                                 containerAdminName);
 
-  kpsr::high_performance::EventLoopMiddlewareProvider<CONTAINER_SIZE> systemEventLoop(nullptr);
   int systemPort;
   yamlEnv.getPropertyInt("server_system_port", systemPort);
   kpsr::admin::socket_mdlw::EventLoopSocketSystemContainerProvider<CONTAINER_SIZE> systemProvider(systemPort,
-                                                                                                  systemEventLoop,
+                                                                                                  adminEventLoop,
                                                                                                   &yamlEnv,
-                                                                                                  containerSystemName);
+                                                                                                  containerAdminName);
   adminEventLoop.start();
   adminProvider.start();
   systemProvider.start();
@@ -68,7 +65,7 @@ int main(int argc, char **argv)
   ZmqMiddlewareFacility zmf(context, rbImgUrl, rbWpUrl, imageTopic, wpTopic, eventloop, poolSize, _factory, &adminProvider.getContainer());
 
   mls::QueenBeeSvc queenBeeSvc(&yamlEnv, zmf._imageDataSubscriber, zmf._toZMQPublisher);
-
+  adminProvider.getContainer().attach(&queenBeeSvc);   
   queenBeeSvc.startup();
   spdlog::info("QBApp: QueenBee Service started");
 

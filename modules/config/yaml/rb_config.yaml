@@ -9,7 +9,6 @@ waypoint_topic: "waypoint_topic"
 pool_size: 256
 qb_img_url: "tcp://*:9001"
 qb_wp_url: "tcp://localhost:9002"
-container_admin_name: "RBApp_admin"
-container_system_name: "RBApp_system"
+container_admin_name: "RBApp1"
 server_admin_port: 9292
 server_system_port: 9393

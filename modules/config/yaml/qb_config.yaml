@@ -5,7 +5,6 @@ img_height: 240
 pool_size: 256
 rb_img_url: "tcp://localhost:9001"
 rb_wp_url: "tcp://*:9002"
-container_admin_name: "QBApp_admin"
-container_system_name: "QBApp_system"
+container_admin_name: "QBApp1"
 server_admin_port: 9090
 server_system_port: 9191

@@ -7,9 +7,8 @@ img_cv_type: 16
 image_topic: "image_data"
 waypoint_topic: "waypoint_topic"
 pool_size: 256
-qb_img_url: "tcp://*:9001"
-qb_wp_url: "tcp://localhost:9002"
-container_admin_name: "RBApp_admin"
-container_system_name: "RBApp_system"
+qb_img_url: "tcp://*:9004"
+qb_wp_url: "tcp://localhost:9005"
+container_admin_name: "RBApp2"
 server_admin_port: 9494
 server_system_port: 9595
