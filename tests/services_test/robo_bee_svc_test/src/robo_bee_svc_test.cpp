@@ -26,7 +26,7 @@ TEST(RoboBeeSvc, TestCase1Waypoint) {
 
   mls::RoboBeeSvc roboBeeSvc(&environment, imageDataProvider.getPublisher(),
                              waypointProvider.getSubscriber(), imgWidth,
-                             imgHeight, "/var/tmp/images", true, 1);
+                             imgHeight, "/home/javi/projects/melissa/tests/data", true, 1);
 
   mls::Waypoint testWaypoint(1234, 10, 10, 30);
 

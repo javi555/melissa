@@ -33,6 +33,7 @@ void QueenBeeSvc::onImgReceived(const kpsr::vision_ocv::ImageData &img) {
   spdlog::info("QueenBeeSvc: image received");
   processImg(img);
   mls::Waypoint waypoint = calculateWaypointForImage(img);
+  //for loop in publishers     
   _waypointPublisher->publish(waypoint);
   spdlog::info("QueenBeeSvc: Published waypoint");
 }

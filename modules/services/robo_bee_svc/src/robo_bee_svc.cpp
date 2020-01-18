@@ -32,6 +32,7 @@ void RoboBeeSvc::start()
 
 void RoboBeeSvc::stop()
 {
+  _waypointSubscriber->removeListener("WpRBSvc");
   _fileNameList->clear();
   _fileNameList = nullptr;
 }
@@ -86,18 +87,19 @@ void RoboBeeSvc::onWaypointReceived(const mls::Waypoint &wp)
   {
     _lastWpSeq = wp.seq;
     _waypoint = wp;
-    spdlog::info("RoboBeeSvc: new waypoint received");
+    spdlog::info("RoboBeeSvc: new waypoint received {} {}", _lastWpSeq, wp.seq);
     goToWaypoint(_waypoint);
   }
   else
   {
-    spdlog::info("RoboBeeSvc: obsolete sequence number ");
+    spdlog::info("RoboBeeSvc: obsolete sequence number {} {}", _lastWpSeq, wp.seq);
   }
 }
 
 void RoboBeeSvc::goToWaypoint(const mls::Waypoint &waypoint)
 {
   // fly to waypoint.x waypoint.y waypoint.z
+
 }
 
 } // namespace mls

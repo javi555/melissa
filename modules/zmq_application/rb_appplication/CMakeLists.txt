@@ -21,7 +21,7 @@ include_directories(
   ${${PROJ_MAIN_NAME}_PATH_MAIN}/modules/codegen/gen/melissa_codegen/poco/include
 )
 include_directories(
-  ${${PROJ_MAIN_NAME}_PATH_MAIN}/modules/zmq_application/qb_application/include
+  ${${PROJ_MAIN_NAME}_PATH_MAIN}/modules/zmq_application/zmq_utils/include
 )
 
 file(GLOB ${PROJ_NAME}_SRC "src/*.cpp")
