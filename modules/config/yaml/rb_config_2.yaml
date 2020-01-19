@@ -1,6 +1,6 @@
-file_images_path: "/home/javi/projects/melissa/tests/data"
-img_width: 320
-img_height: 240
+file_images_path: "/home/javi/projects/melissa/tests/highResData"
+img_width: 640
+img_height: 480
 restart_if_no_more_images: true
 robo_bee_prefix: 200000
 img_cv_type: 16

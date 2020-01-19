@@ -15,7 +15,9 @@ void QueenBeeSvc::start() {
       "ImgDataQBSvc",
       std::bind(&QueenBeeSvc::onImgReceived, this, std::placeholders::_1));
 }
-void QueenBeeSvc::stop() {}
+void QueenBeeSvc::stop() {
+  _imageDataSubscriber->removeListener("ImgDataQBSvc");
+}
 void QueenBeeSvc::execute() {}
 
 void QueenBeeSvc::processImg(const kpsr::vision_ocv::ImageData &img) {
@@ -33,7 +35,7 @@ void QueenBeeSvc::onImgReceived(const kpsr::vision_ocv::ImageData &img) {
   spdlog::info("QueenBeeSvc: image received");
   processImg(img);
   mls::Waypoint waypoint = calculateWaypointForImage(img);
-  //for loop in publishers     
+  //for loop in publishers
   _waypointPublisher->publish(waypoint);
   spdlog::info("QueenBeeSvc: Published waypoint");
 }

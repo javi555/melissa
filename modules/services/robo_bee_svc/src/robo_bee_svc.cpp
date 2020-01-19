@@ -74,6 +74,7 @@ void RoboBeeSvc::getImage(cv::Mat &img)
     if (_restartIfNoMoreImages)
     {
       this->stop();
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
       this->start();
       getImage(img);
       return;
