@@ -24,7 +24,7 @@ class ZmqMiddlewareFacility
 public:
     ZmqMiddlewareFacility(zmq::context_t &context, std::string rbImgUrl, std::string rbWpUrl, std::string imgTopic, std::string wpTopic,
                           kpsr::high_performance::EventLoopMiddlewareProvider<EVENT_LOOP_SIZE> &eventloop, int poolSize,
-                          kpsr::vision_ocv::ImageDataFactory &factory, kpsr::Container *container);
+                          kpsr::vision_ocv::ImageDataFactory &factory, kpsr::Container *container, int numPublishers);
 
     ~ZmqMiddlewareFacility(){};
 
@@ -36,17 +36,16 @@ public:
     std::string _wpTopic;
     kpsr::high_performance::EventLoopMiddlewareProvider<EVENT_LOOP_SIZE> &_eventloop;
     int _poolSize;
+    int _numPublishers;
     kpsr::vision_ocv::ImageDataFactory &_factory;
 
     zmq::socket_t _subscriber;
-    zmq::socket_t _publisher;
+    std::vector<std::shared_ptr<zmq::socket_t>> _publishers;
     kpsr::Subscriber<kpsr::vision_ocv::ImageData> *_imageDataSubscriber;
     kpsr::Publisher<kpsr::vision_ocv::ImageData> *_imageDataPublisher;
-    kpsr::Subscriber<mls::Waypoint> *_waypointSubscriber;
-    kpsr::Publisher<mls::Waypoint> *_waypointPublisher;
     kpsr::zmq_mdlw::FromZmqChannel<Base> *_binaryFromZMQProvider;
-    kpsr::Publisher<mls::Waypoint> *_toZMQPublisher;
+    std::vector<mls::WpPublisherConfig> _toZMQPublishers;
     kpsr::zmq_mdlw::FromZmqMiddlewareProvider _fromZmqMiddlewareProvider;
-    kpsr::zmq_mdlw::ToZMQMiddlewareProvider _toZMQMiddlewareProvider;
+    std::vector<std::shared_ptr<kpsr::zmq_mdlw::ToZMQMiddlewareProvider>> _toZMQMiddlewareProviders;
 };
 #endif // ZMQMIDDLEWAREFACILITY_H

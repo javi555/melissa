@@ -23,13 +23,27 @@
 
 #include "waypoint.h"
 
-namespace mls {
-class QueenBeeSvc : public kpsr::Service {
+namespace mls
+{
+struct WpPublisherConfig
+{
+  int _minIndex;
+  int _maxIndex;
+  kpsr::Publisher<Waypoint> *_waypointPublisher;
+  WpPublisherConfig(){}
+  WpPublisherConfig(int index, kpsr::Publisher<Waypoint> *waypointPublisher)
+  : _minIndex(index*100000)
+  , _maxIndex((index+1)*100000)
+  , _waypointPublisher(waypointPublisher)
+  {}
+};
+class QueenBeeSvc : public kpsr::Service
+{
 public:
   QueenBeeSvc(
       kpsr::Environment *environment,
       kpsr::Subscriber<kpsr::vision_ocv::ImageData> *imageDataSubscriber,
-      kpsr::Publisher<mls::Waypoint> *waypointPublisher);
+      std::vector<mls::WpPublisherConfig> waypointPublishers);
 
   ~QueenBeeSvc(){};
 
@@ -48,8 +62,8 @@ private:
   void create();
   void onImgReceived(const kpsr::vision_ocv::ImageData &img);
 
-  kpsr::Publisher<mls::Waypoint> *_waypointPublisher;
   kpsr::Subscriber<kpsr::vision_ocv::ImageData> *_imageDataSubscriber;
+  std::vector<mls::WpPublisherConfig> _waypointPublishers;
 };
 
 } // namespace mls

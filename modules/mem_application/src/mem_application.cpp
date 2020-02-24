@@ -59,9 +59,12 @@ int main(int argc, char **argv) {
   kpsr::Publisher<mls::Waypoint> *waypointPublisher =
       eventloop.getPublisher<mls::Waypoint>("Waypoint", 0, nullptr, nullptr);
 
+  std::vector<mls::WpPublisherConfig> waypointPublishers;
+  waypointPublishers.push_back(mls::WpPublisherConfig(0, waypointPublisher));
+
   mls::RoboBeeSvc roboBeeSvc(&yamlEnv, imageDataPublisher, waypointSubscriber,
                              imgWidth, imgHeight, fileImagesPath, true, roboBeePrefix);
-  mls::QueenBeeSvc queenBeeSvc(&yamlEnv, imageDataSubscriber, waypointPublisher);
+  mls::QueenBeeSvc queenBeeSvc(&yamlEnv, imageDataSubscriber, waypointPublishers);
 
   roboBeeSvc.startup();
   spdlog::info("MemApp: RoboBee Service started");
