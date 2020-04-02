@@ -19,18 +19,20 @@ TEST(QueenBeeSvc, TestCase1Image) {
   kpsr::EventEmitterMiddlewareProvider<mls::Waypoint> waypointProvider(
       nullptr, "Waypoint", 0, nullptr, nullptr);
 
+  std::vector<mls::WpPublisherConfig> wpPubs;
+  wpPubs.push_back(mls::WpPublisherConfig(0, waypointProvider.getPublisher()));
+
   kpsr::mem::MemEnv environment;
 
   float imgWidth = 320;
   float imgHeight = 240;
 
   mls::QueenBeeSvc queenBeeSvc(&environment, imageDataProvider.getSubscriber(),
-                               waypointProvider.getPublisher());
+                               wpPubs);
 
   std::string image_path = "/home/javi/projects/melissa/tests/data/dillenia.jpg";
   kpsr::vision_ocv::ImageData testImg;
   testImg.img = cv::imread(image_path);
-  ;
   testImg.seq = 1234;
   testImg.frameId = "testFrame";
 

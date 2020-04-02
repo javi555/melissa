@@ -19,6 +19,7 @@ int main(int argc, char **argv)
   std::string rbImgUrl;
   std::string rbWpUrl;
   std::string containerAdminName;
+  int numPublishers;
 
   yamlEnv.getPropertyString("rb_img_url", rbImgUrl);
   yamlEnv.getPropertyString("rb_wp_url", rbWpUrl);
@@ -28,6 +29,7 @@ int main(int argc, char **argv)
   yamlEnv.getPropertyInt("img_width", imgWidth);
   yamlEnv.getPropertyInt("pool_size", poolSize);
   yamlEnv.getPropertyString("container_admin_name", containerAdminName);
+  yamlEnv.getPropertyInt("num_publishers", numPublishers);
 
   kpsr::high_performance::EventLoopMiddlewareProvider<CONTAINER_SIZE> adminEventLoop(nullptr);
   int adminPort;
@@ -58,13 +60,14 @@ int main(int argc, char **argv)
   spdlog::info("pool_size: {}", poolSize);
   spdlog::info("server_admin_port: {}", adminPort);
   spdlog::info("server_system_port {}", systemPort);
+  spdlog::info("num_publishers: {}", numPublishers);
 
   kpsr::vision_ocv::ImageDataFactory _factory(imgWidth, imgHeight, 0, "frame");
 
   zmq::context_t context(1);
-  ZmqMiddlewareFacility zmf(context, rbImgUrl, rbWpUrl, imageTopic, wpTopic, eventloop, poolSize, _factory, &adminProvider.getContainer());
+  ZmqMiddlewareFacility zmf(context, rbImgUrl, rbWpUrl, imageTopic, wpTopic, eventloop, poolSize, _factory, &adminProvider.getContainer(), numPublishers);
 
-  mls::QueenBeeSvc queenBeeSvc(&yamlEnv, zmf._imageDataSubscriber, zmf._toZMQPublisher);
+  mls::QueenBeeSvc queenBeeSvc(&yamlEnv, zmf._imageDataSubscriber, zmf._toZMQPublishers);
   adminProvider.getContainer().attach(&queenBeeSvc);   
   queenBeeSvc.startup();
   spdlog::info("QBApp: QueenBee Service started");

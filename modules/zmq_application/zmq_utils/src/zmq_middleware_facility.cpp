@@ -5,7 +5,7 @@ ZmqMiddlewareFacility::ZmqMiddlewareFacility(zmq::context_t &context,
                                              std::string rbImgUrl, std::string rbWpUrl, std::string imgTopic, std::string wpTopic,
                                              kpsr::high_performance::EventLoopMiddlewareProvider<EVENT_LOOP_SIZE> &eventloop,
                                              int poolSize, kpsr::vision_ocv::ImageDataFactory &factory,
-                                             kpsr::Container *container)
+                                             kpsr::Container *container, int numPublishers)
     : _rbImgUrl(rbImgUrl)
     , _rbWpUrl(rbWpUrl)
     , _imgTopic(imgTopic)
@@ -13,18 +13,18 @@ ZmqMiddlewareFacility::ZmqMiddlewareFacility(zmq::context_t &context,
     , _eventloop(eventloop)
     , _poolSize(poolSize)
     , _factory(factory)
+    , _numPublishers(numPublishers)
     , _imageDataSubscriber(nullptr)
     , _imageDataPublisher(nullptr)
-    , _waypointSubscriber(nullptr)
-    , _waypointPublisher(nullptr)
     , _binaryFromZMQProvider(nullptr)
-    , _toZMQPublisher(nullptr)
     , _subscriber(context, ZMQ_SUB)
-    , _publisher(context, ZMQ_PUB)
     , _fromZmqMiddlewareProvider()
-    , _toZMQMiddlewareProvider(container, _publisher)
+    , _publishers(_numPublishers)
+    , _toZMQPublishers(_numPublishers)
+    , _toZMQMiddlewareProviders(_numPublishers)
 {
-  _subscriber.connect(_rbImgUrl);
+
+  _subscriber.bind(_rbImgUrl);
 
   _subscriber.setsockopt(ZMQ_SUBSCRIBE, imgTopic.c_str(), imgTopic.size());
 
@@ -39,10 +39,18 @@ ZmqMiddlewareFacility::ZmqMiddlewareFacility(zmq::context_t &context,
 
   _binaryFromZMQProvider->registerToTopic(_imgTopic, _imageDataPublisher);
 
-  _publisher.bind(_rbWpUrl);
+  for (int i = 0; i < _publishers.size(); i++)
+  {
+    std::string fullWpUrl = _rbWpUrl+std::to_string(9002+(10*i));
+    spdlog::info("fullWpUrl: {}", fullWpUrl);
+    _publishers[i] = std::make_shared<zmq::socket_t>(context, ZMQ_PUB);
+    _publishers[i].get()->bind(fullWpUrl);
+    _toZMQMiddlewareProviders[i] = std::make_shared<kpsr::zmq_mdlw::ToZMQMiddlewareProvider>(container, *_publishers[i].get());
+    _toZMQPublishers[i]._minIndex = 100000*(i+1);
+    _toZMQPublishers[i]._maxIndex = 100000*(i+2)-1;
+    _toZMQPublishers[i]._waypointPublisher = _toZMQMiddlewareProviders[i]->getBinaryToMiddlewareChannel<mls::Waypoint>(_wpTopic, 10);
 
-  _toZMQPublisher = _toZMQMiddlewareProvider
-                        .getBinaryToMiddlewareChannel<mls::Waypoint>(_wpTopic, 10);
+  }
 }
 
 void ZmqMiddlewareFacility::stop()

@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 
   zmq::context_t context(1);
   zmq::socket_t publisher(context, ZMQ_PUB);
-  publisher.bind(qbImgUrl);
+  publisher.connect(qbImgUrl);
 
   kpsr::zmq_mdlw::ToZMQMiddlewareProvider toZMQMiddlewareProvider(&adminProvider.getContainer(), publisher);
 
